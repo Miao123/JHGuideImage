@@ -7,7 +7,8 @@
 //
 
 #import "AppDelegate.h"
-
+#import "ViewController.h"
+#import "SecondViewController.h"
 @interface AppDelegate ()
 
 @end
@@ -17,8 +18,44 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen]bounds]];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(changeFont:) name:@"labelFount" object:nil];
+    
+    //判断是不是第一次启动应用
+    if(![[NSUserDefaults standardUserDefaults] boolForKey:@"firstLaunch"]){
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"firstLaunch"];
+        NSLog(@"第一次启动");
+        [self openLoginVC];
+    }else{
+        NSLog(@"不是第一次启动");
+        [self openHomeVC];
+    }
+    self.window.backgroundColor = [UIColor whiteColor];
+    [self.window makeKeyAndVisible];
+    
     return YES;
 }
+
+- (void)openLoginVC{
+    //如果是第一次启动的话,使用UserGuideViewController (用户引导页面) 作为根视图
+    ViewController *FirstVC = [[ViewController alloc] init];
+    UINavigationController *firstNav = [[UINavigationController alloc] initWithRootViewController:FirstVC];
+    self.window.rootViewController = firstNav;
+}
+
+
+- (void)openHomeVC{
+    //如果不是第一次启动的话,使用LoginViewController作为根视图
+    SecondViewController *secondVC = [[SecondViewController alloc] init];
+    UINavigationController *secondNav = [[UINavigationController alloc]initWithRootViewController:secondVC];
+    self.window.rootViewController = secondNav;
+}
+
+
+- (void)changeFont:(NSNotification *)notification{
+    [self openHomeVC];
+}
+
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -40,6 +77,10 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+- (void)dealloc{
+    [[NSNotificationCenter defaultCenter] removeObserver:@"labelFount"];
 }
 
 @end
